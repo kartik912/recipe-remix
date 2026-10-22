@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe Remix — AI that cooks with what you've got</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-badge">🤖 AI Agent Showcase</div>
+      <h1>Recipe <span>Remix</span></h1>
+      <p class="tagline">
+        Tell me what's in your kitchen. I'll decide what to cook, remix it to
+        your taste, and tell you what to buy.
+      </p>
+    </header>
+
+    <main>
+      <!-- ingredient input -->
+      <section class="card input-card">
+        <label class="field-label" for="ingredient-input"
+          >What do you have? <span class="hint">press Enter to add</span></label
+        >
+        <div class="chip-input" id="chip-input">
+          <input
+            id="ingredient-input"
+            type="text"
+            placeholder="e.g. eggs, rice, chicken…"
+            autocomplete="off"
+          />
+        </div>
+
+        <label class="field-label" for="preference"
+          >Any preference? <span class="hint">optional</span></label
+        >
+        <div class="pref-row">
+          <input
+            id="preference"
+            type="text"
+            placeholder="e.g. vegetarian, under 20 minutes, high-protein…"
+          />
+          <button id="generate-btn" class="btn btn-primary">
+            Find Recipes ✨
+          </button>
+        </div>
+
+        <div class="quick-adds">
+          <span>Quick add:</span>
+          <button class="tag" data-add="eggs">eggs</button>
+          <button class="tag" data-add="rice">rice</button>
+          <button class="tag" data-add="chicken">chicken</button>
+          <button class="tag" data-add="tomato">tomato</button>
+          <button class="tag" data-add="onion">onion</button>
+          <button class="tag" data-add="pasta">pasta</button>
+          <button class="tag" data-add="cheese">cheese</button>
+        </div>
+      </section>
+
+      <!-- agent status / thinking indicator -->
+      <div id="agent-status" class="agent-status hidden">
+        <div class="spinner"></div>
+        <span id="agent-status-text">Remy is thinking…</span>
+      </div>
+
+      <!-- the agent's routing decision badge -->
+      <div id="route-badge" class="route-badge hidden"></div>
+
+      <!-- results -->
+      <section id="results" class="results"></section>
+
+      <!-- "ask the chef" — free text, the agent decides what to do -->
+      <section class="card ask-card hidden" id="ask-card">
+        <label class="field-label" for="ask-input"
+          >🧠 Ask the agent
+          <span class="hint">it decides whether to remix or make a list</span></label
+        >
+        <div class="pref-row">
+          <input
+            id="ask-input"
+            type="text"
+            placeholder="e.g. make them vegetarian · spicier · a shopping list for recipe 2"
+          />
+          <button id="ask-btn" class="btn btn-secondary">Go</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Built for the AI Showcase · <strong>vanilla HTML/CSS/JS</strong> +
+        a Vercel serverless function · powered by <strong>Google Gemini</strong>
+      </p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

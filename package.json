@@ -1,0 +1,11 @@
+{
+  "name": "recipe-remix",
+  "version": "1.0.0",
+  "description": "AI agent that turns the ingredients you have into recipes, remixes them, and builds a shopping list. Vanilla HTML/CSS/JS + a Vercel serverless function + Google Gemini.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "test:gemini": "node test-gemini.mjs"
+  }
+}

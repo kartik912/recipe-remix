@@ -1,0 +1,9 @@
+# secrets — never commit your API key
+.env
+.env.local
+.env.*.local
+
+# dependencies / build
+node_modules/
+.vercel
+.DS_Store
