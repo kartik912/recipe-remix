@@ -133,9 +133,17 @@ function buildAdapt(data) {
     temperature: 0.7,
     prompt:
       `Here are the current recipes as JSON:\n${JSON.stringify(recipes)}\n\n` +
-      `Modify ALL of them according to this request: "${tweak}". ` +
-      `Keep the same structure and the same number of recipes. ` +
-      `Update names/steps/ingredients so the change is real, not cosmetic.`,
+      `Rewrite ALL of them to genuinely satisfy this request: "${tweak}".\n\n` +
+      `Rules:\n` +
+      `- Actually APPLY the change. If an ingredient conflicts with the request, ` +
+      `REMOVE it — do not just add new ingredients on top of it.\n` +
+      `- "Vegetarian" means NO meat, NO poultry, NO fish or seafood, and NO eggs. ` +
+      `Replace them with vegetarian options (e.g. paneer, tofu, mushrooms, beans, extra veg).\n` +
+      `- "Vegan" additionally means no dairy and no honey.\n` +
+      `- After changing ingredients, REWRITE the name, steps, usesYourIngredients ` +
+      `and extraIngredients to match. Any removed ingredient must disappear from every ` +
+      `list and from every step.\n` +
+      `- Keep the same number of recipes.`,
   };
 }
 

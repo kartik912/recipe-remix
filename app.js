@@ -68,6 +68,8 @@ document.querySelectorAll(".tag[data-add]").forEach((btn) => {
 // ---------- talking to the agent ----------
 async function callAgent(action, data, statusMessage) {
   showStatus(statusMessage);
+  // dim + lock the current recipes so it's obvious the agent is reworking them
+  if (state.recipes.length) resultsEl.classList.add("busy");
   try {
     const resp = await fetch("/api/ask", {
       method: "POST",
@@ -79,6 +81,7 @@ async function callAgent(action, data, statusMessage) {
     return json;
   } finally {
     hideStatus();
+    resultsEl.classList.remove("busy");
   }
 }
 
@@ -151,11 +154,13 @@ async function shop(recipe) {
 // ---------- the ROUTER: agent decides which tool ----------
 async function askAgent(text) {
   if (!text.trim()) return;
+  askBtn.disabled = true;
+  askInput.disabled = true;
   try {
     const decision = await callAgent(
       "route",
       { text, hasRecipes: state.recipes.length > 0 },
-      "Agent is deciding what to do…"
+      "🧠 Agent is deciding what to do…"
     );
     showRouteBadge(decision);
 
@@ -175,8 +180,12 @@ async function askAgent(text) {
       if (text) preferenceInput.value = text;
       await generate();
     }
+    askInput.value = "";
   } catch (err) {
     showError(err.message);
+  } finally {
+    askBtn.disabled = false;
+    askInput.disabled = false;
   }
 }
 
