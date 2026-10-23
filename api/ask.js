@@ -11,8 +11,18 @@
 //   - "adapt"    : recipes + a tweak  -> modified recipes
 //   - "shop"     : one recipe + what you own -> shopping list
 
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+// Google retires / throttles models often, so we keep a fallback chain.
+// The function tries these in order and moves on if one is 404 (retired) or
+// 503 (overloaded). Reorder/extend this list if availability changes again.
+const MODELS = [
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3-flash-preview",
+  "gemini-flash-lite-latest",
+];
+
+const modelUrl = (model) =>
+  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
 // ---- Response shapes we force Gemini to return (so the UI can render cards) ----
 
@@ -87,21 +97,34 @@ async function callGemini({ system, prompt, schema, temperature = 0.8 }) {
     },
   };
 
-  const resp = await fetch(`${GEMINI_URL}?key=${key}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let lastError = "";
+  for (const model of MODELS) {
+    const resp = await fetch(`${modelUrl(model)}?key=${key}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
-  if (!resp.ok) {
-    const detail = await resp.text();
-    throw new Error(`Gemini API error (${resp.status}): ${detail}`);
+    // 404 = model retired, 503 = overloaded — try the next model in the chain
+    if (resp.status === 404 || resp.status === 503) {
+      lastError = `${model} unavailable (${resp.status})`;
+      continue;
+    }
+
+    if (!resp.ok) {
+      const detail = await resp.text();
+      throw new Error(`Gemini API error (${resp.status}): ${detail}`);
+    }
+
+    const data = await resp.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("Gemini returned an empty response.");
+    return JSON.parse(text);
   }
 
-  const data = await resp.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Gemini returned an empty response.");
-  return JSON.parse(text);
+  throw new Error(
+    `All Gemini models are currently unavailable. Last: ${lastError}`
+  );
 }
 
 // ---- Prompt builders for each tool ----

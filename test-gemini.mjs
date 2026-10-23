@@ -32,8 +32,15 @@ if (!key || key === "your_key_here") {
   process.exit(1);
 }
 
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+// Same fallback chain as api/ask.js — try each until one answers.
+const MODELS = [
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3-flash-preview",
+  "gemini-flash-lite-latest",
+];
+const modelUrl = (m) =>
+  `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
 
 const body = {
   contents: [
@@ -71,26 +78,43 @@ const body = {
   },
 };
 
-console.log("⏳ Calling Gemini (gemini-2.5-flash)…");
-
 try {
-  const resp = await fetch(`${GEMINI_URL}?key=${key}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let data = null;
+  let used = "";
+  let lastError = "";
 
-  if (!resp.ok) {
-    console.error(`\n❌ Gemini returned HTTP ${resp.status}:`);
-    console.error(await resp.text());
+  for (const model of MODELS) {
+    console.log(`⏳ Trying ${model}…`);
+    const resp = await fetch(`${modelUrl(model)}?key=${key}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (resp.status === 404 || resp.status === 503) {
+      lastError = `${model} unavailable (HTTP ${resp.status})`;
+      console.log(`   ↳ skipped: ${lastError}`);
+      continue;
+    }
+    if (!resp.ok) {
+      console.error(`\n❌ ${model} returned HTTP ${resp.status}:`);
+      console.error(await resp.text());
+      process.exit(1);
+    }
+    data = await resp.json();
+    used = model;
+    break;
+  }
+
+  if (!data) {
+    console.error(`\n❌ All models unavailable right now. Last: ${lastError}\n`);
     process.exit(1);
   }
 
-  const data = await resp.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   const parsed = JSON.parse(text);
 
-  console.log("\n✅ SUCCESS — key works and JSON parsed cleanly.\n");
+  console.log(`\n✅ SUCCESS — key works and JSON parsed cleanly (via ${used}).\n`);
   parsed.recipes.forEach((r, i) => {
     console.log(`  ${i + 1}. ${r.name}  (${r.time || "n/a"}) — ${r.steps.length} steps`);
   });

@@ -7,7 +7,7 @@ Built for the company AI Showcase with the simplest possible stack:
 
 - **Vanilla HTML + CSS + JavaScript** — no framework
 - **One Vercel serverless function** (`api/ask.js`) that keeps the API key secret
-- **Google Gemini** (`gemini-2.5-flash`) — free tier, no credit card
+- **Google Gemini** (`gemini-3.6-flash`, with automatic fallback to other models) — free tier, no credit card
 
 ## Why it's an "AI agent" (the showcase angle)
 
